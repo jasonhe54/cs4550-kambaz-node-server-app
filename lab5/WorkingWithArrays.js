@@ -54,6 +54,12 @@ export default function WorkingWithArrays(app) {
     todo.description = description;
     res.json(todos);
   };
+  const postNewTodo = (req, res) => {
+    const newTodo = { ...req.body, id: new Date().getTime() };
+    todos.push(newTodo);
+    res.json(newTodo);
+  };
+
   app.get("/lab5/todos", getTodos);
   app.get("/lab5/todos/create", createNewTodo);
   app.get("/lab5/todos/:id", getTodoById);
@@ -61,4 +67,5 @@ export default function WorkingWithArrays(app) {
   app.get("/lab5/todos/:id/title/:title", updateTodoTitle);
   app.get("/lab5/todos/:id/completed/:completed", updateTodoCompleted);
   app.get("/lab5/todos/:id/description/:description", updateTodoDescription);
+  app.post("/lab5/todos", postNewTodo);
 };

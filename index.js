@@ -5,6 +5,7 @@ import cors from "cors";
 
 const app = express()
 app.use(cors());
+app.use(express.json());
 lab5(app)
 hello(app)
 app.listen(process.env.PORT || 4000)
