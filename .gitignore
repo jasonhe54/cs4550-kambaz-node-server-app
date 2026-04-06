@@ -2,3 +2,6 @@ node_modules
 ext
 .env
 .env.development
+
+# mongodb data directory
+data/
