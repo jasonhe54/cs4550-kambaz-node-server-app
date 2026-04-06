@@ -29,7 +29,7 @@ export default function UsersDao() {
 
   const updateUser = (userId, userUpdates) => model.updateOne({ _id: userId }, { $set: userUpdates });
 
-  const deleteUser = (userId) => model.deleteOne({ _id: userId });
+  const deleteUser = (userId) => model.findByIdAndDelete(userId);
 
   return {
     createUser,
