@@ -5,3 +5,4 @@ ext
 
 # mongodb data directory
 data/
+kambaz/database/export/
