@@ -1,70 +1,23 @@
 import { v4 as uuidv4 } from "uuid";
+import model from "./model.js";
 
-const ALLOWED_ROLES = ["ADMIN", "FACULTY", "TA", "STUDENT"];
+export default function UsersDao() {
+  // I guess this is implemented later? Why on earth did i even try to work ahead
+  const createUser = (user) => {}; 
 
-// normalize roles to uppercase, trim whitespace - easier to store given no typescript here
-const normalizeRole = (role) =>
-  typeof role === "string" ? role.trim().toUpperCase() : "";
+  const findAllUsers = () => model.find();
 
-const roleValidationError = () => ({
-  error: `Invalid user role. Allowed roles: ${ALLOWED_ROLES.join(", ")}`,
-});
-
-export default function UsersDao(db) {
-  const createUser = (user = {}) => {
-    const role = normalizeRole(user.role);
-    if (!ALLOWED_ROLES.includes(role)) {
-      return roleValidationError();
-    }
-    const newUser = { ...user, role, _id: uuidv4() };
-    db.users = [...db.users, newUser];
-    return newUser;
-  };
-
-  const findAllUsers = () => db.users;
-
-  const findUserById = (userId) => db.users.find((user) => user._id === userId);
+  const findUserById = (userId) => model.findById(userId);
 
   const findUserByUsername = (username) =>
-    db.users.find((user) => user.username === username);
+    model.findOne({ username: username });
 
   const findUserByCredentials = (username, password) =>
-    db.users.find((user) => user.username === username && user.password === password);
+    model.findOne({ username, password });
 
-  const updateUser = (userId, userUpdates) => {
-    const user = findUserById(userId);
-    if (!user) {
-      return null;
-    }
+  const updateUser = (userId, userUpdates) => model.updateOne({ _id: userId }, { $set: userUpdates });
 
-    const existingUser = userUpdates.username
-      ? findUserByUsername(userUpdates.username)
-      : null;
-    if (existingUser && existingUser._id !== userId) {
-      return null;
-    }
-
-    const updates = { ...userUpdates };
-    if (Object.prototype.hasOwnProperty.call(updates, "role")) {
-      const role = normalizeRole(updates.role);
-      if (!ALLOWED_ROLES.includes(role)) {
-        return roleValidationError();
-      }
-      updates.role = role;
-    }
-
-    Object.assign(user, updates, { _id: userId });
-    return user;
-  };
-
-  const deleteUser = (userId) => {
-    const user = findUserById(userId);
-    if (!user) {
-      return null;
-    }
-    db.users = db.users.filter((u) => u._id !== userId);
-    return user;
-  };
+  const deleteUser = (userId) => model.deleteOne({ _id: userId });
 
   return {
     createUser,
