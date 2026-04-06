@@ -2,8 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import model from "./model.js";
 
 export default function UsersDao() {
-  // I guess this is implemented later? Why on earth did i even try to work ahead
-  const createUser = (user) => {}; 
+  const createUser = (user) => model.create({ ...user, _id: user._id || uuidv4() });
 
   const findAllUsers = () => model.find();
 
