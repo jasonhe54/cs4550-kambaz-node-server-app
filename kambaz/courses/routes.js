@@ -24,6 +24,12 @@ export default function CourseRoutes(app, db) {
     res.json(courses);
   };
 
+  const findUsersForCourse = async (req, res) => {
+    const { cid } = req.params;
+    const users = await enrollmentsDao.findUsersForCourse(cid);
+    res.json(users);
+  };
+
   const createCourse = async (req, res) => {
     const currentUser = req.session["currentUser"];
     if (!currentUser) {
@@ -78,6 +84,7 @@ export default function CourseRoutes(app, db) {
   };
 
   app.post("/api/courses", createCourse);
+  app.get("/api/courses/:cid/users", findUsersForCourse);
   app.post("/api/users/:uid/courses/:cid", enrollUserInCourse);
   app.get("/api/users/:userId/courses", findCoursesForEnrolledUser);
   app.delete("/api/users/:uid/courses/:cid", unenrollUserFromCourse);
