@@ -50,36 +50,37 @@ export default function CourseRoutes(app, db) {
   };
 
   const enrollUserInCourse = async (req, res) => {
-    const currentUser = req.session["currentUser"];
-    if (!currentUser) {
-      res.sendStatus(401);
-      return;
+    let { uid, cid } = req.params;
+    if (uid === "current") {
+      const currentUser = req.session["currentUser"];
+      if (!currentUser) {
+        res.sendStatus(401);
+        return;
+      }
+      uid = currentUser._id;
     }
-    const { courseId } = req.params;
-    const course = dao.findCourseById(courseId);
-    if (!course) {
-      res.status(404).json({ message: `Unable to enroll in course ${courseId}` });
-      return;
-    }
-    const enrollment = await enrollmentsDao.enrollUserInCourse(currentUser._id, courseId);
-    res.json({ course, enrollment });
+    const status = await enrollmentsDao.enrollUserInCourse(uid, cid);
+    res.send(status);
   };
 
   const unenrollUserFromCourse = async (req, res) => {
-    const currentUser = req.session["currentUser"];
-    if (!currentUser) {
-      res.sendStatus(401);
-      return;
+    let { uid, cid } = req.params;
+    if (uid === "current") {
+      const currentUser = req.session["currentUser"];
+      if (!currentUser) {
+        res.sendStatus(401);
+        return;
+      }
+      uid = currentUser._id;
     }
-    const { courseId } = req.params;
-    await enrollmentsDao.unenrollUserFromCourse(currentUser._id, courseId);
-    res.sendStatus(200);
+    const status = await enrollmentsDao.unenrollUserFromCourse(uid, cid);
+    res.send(status);
   };
 
   app.post("/api/courses", createCourse);
-  app.post("/api/users/current/courses/:courseId", enrollUserInCourse);
+  app.post("/api/users/:uid/courses/:cid", enrollUserInCourse);
   app.get("/api/users/:userId/courses", findCoursesForEnrolledUser);
-  app.delete("/api/users/current/courses/:courseId", unenrollUserFromCourse);
+  app.delete("/api/users/:uid/courses/:cid", unenrollUserFromCourse);
   app.delete("/api/courses/:courseId", deleteCourse);
   app.put("/api/courses/:courseId", updateCourse);
   app.get("/api/courses", findAllCourses);
