@@ -4,7 +4,6 @@ import session from "express-session";
 import hello from "./hello.js"
 import lab5 from "./lab5/index.js";
 import cors from "cors";
-import db from "./kambaz/database/index.js";
 import UserRoutes from "./kambaz/users/routes.js";
 import CourseRoutes from "./kambaz/courses/routes.js";
 import ModulesRoutes from "./kambaz/modules/routes.js";
@@ -54,10 +53,10 @@ if (process.env.SERVER_ENV !== "development") {
 }
 app.use(session(sessionOptions));
 app.use(express.json());
-UserRoutes(app, db);
-CourseRoutes(app, db);
-ModulesRoutes(app, db);
-AssignmentRoutes(app, db);
+UserRoutes(app);
+CourseRoutes(app);
+ModulesRoutes(app);
+AssignmentRoutes(app);
 lab5(app)
 hello(app)
 const port = process.env.PORT || 4000

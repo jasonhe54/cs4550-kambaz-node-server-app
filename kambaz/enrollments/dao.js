@@ -1,6 +1,6 @@
 import model from "./model.js";
 
-export default function EnrollmentsDao(db) {
+export default function EnrollmentsDao() {
   async function findCoursesForUser(userId) {
     const enrollments = await model.find({ user: userId }).populate("course");
     return enrollments.map((enrollment) => enrollment.course);
