@@ -3,15 +3,32 @@ import UsersDao from "./dao.js";
 export default function UserRoutes(app) {
   const dao = UsersDao();
 
+  const isAdminUser = (user) => Boolean(user && user.role === "ADMIN");
+
+  const requireAdmin = (req, res) => {
+    const currentUser = req.session["currentUser"];
+    if (!currentUser) {
+      res.status(401).json({ message: "You must be signed in." });
+      return null;
+    }
+    if (!isAdminUser(currentUser)) {
+      res.status(403).json({ message: "Admin access required." });
+      return null;
+    }
+    return currentUser;
+  };
+
   const createUser = async (req, res) => {
+    if (!requireAdmin(req, res)) return;
     const newUser = await dao.createUser(req.body);
     res.json(newUser);
   };
 
   const deleteUser = async (req, res) => {
+    if (!requireAdmin(req, res)) return;
     const { userId } = req.params;
     const deletedUser = await dao.deleteUser(userId);
-    if (!deletedUser || deletedUser.deletedCount === 0) {
+    if (!deletedUser) {
       res.status(404).json({ message: `Unable to delete user with ID ${userId}` });
       return;
     }
@@ -22,6 +39,8 @@ export default function UserRoutes(app) {
   };
 
   const findAllUsers = async (req, res) => {
+    if (!requireAdmin(req, res)) return;
+
     const { role, name } = req.query;
     if (role && name) {
       const users = await dao.findUsersByRoleAndPartialName(role, name);
@@ -43,6 +62,7 @@ export default function UserRoutes(app) {
   };
 
   const findUserById = async (req, res) => {
+    if (!requireAdmin(req, res)) return;
     const { userId } = req.params;
     const user = await dao.findUserById(userId);
     if (!user) {
