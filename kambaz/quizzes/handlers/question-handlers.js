@@ -1,6 +1,21 @@
+const toPlainQuestion = (question) =>
+  typeof question?.toObject === "function" ? question.toObject() : question;
+
+const redactQuestionAnswerKey = (question) => {
+  const plain = toPlainQuestion(question);
+  if (!plain) return plain;
+  return {
+    ...plain,
+    correctChoiceId: "",
+    trueFalseAnswer: null,
+    blankAnswers: [],
+  };
+};
+
 export const createQuestionHandlers = ({
   dao,
   questionsDao,
+  attemptsDao,
   isPrivilegedUser,
   ensureCourseAccess,
   syncQuizDerivedFields,
@@ -28,9 +43,24 @@ export const createQuestionHandlers = ({
     const syncedQuiz = await syncQuizDerivedFields(quiz);
     const questions = await getOrderedQuestionsForQuiz(syncedQuiz || quiz);
 
+    const isFacultyView = isPrivilegedUser(currentUser);
+    let canSeeAnswerKey = isFacultyView;
+
+    if (!canSeeAnswerKey && quiz.showCorrectAnswers) {
+      const latestAttempt = await attemptsDao.findLatestAttemptForUserAndQuiz(
+        currentUser._id,
+        quizId
+      );
+      canSeeAnswerKey = Boolean(latestAttempt);
+    }
+
+    const questionsForResponse = canSeeAnswerKey
+      ? questions.map(toPlainQuestion)
+      : questions.map(redactQuestionAnswerKey);
+
     const requestedIndex = req.query?.index;
     if (requestedIndex === undefined) {
-      res.json(questions);
+      res.json(questionsForResponse);
       return;
     }
 
@@ -40,15 +70,15 @@ export const createQuestionHandlers = ({
       return;
     }
 
-    if (parsedIndex >= questions.length) {
+    if (parsedIndex >= questionsForResponse.length) {
       res.status(404).json({ message: "Question index out of range." });
       return;
     }
 
     res.json({
       index: parsedIndex,
-      total: questions.length,
-      question: questions[parsedIndex],
+      total: questionsForResponse.length,
+      question: questionsForResponse[parsedIndex],
     });
   };
 

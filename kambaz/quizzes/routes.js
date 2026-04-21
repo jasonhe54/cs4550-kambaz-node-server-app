@@ -72,6 +72,7 @@ export default function QuizzesRoutes(app) {
   } = createQuestionHandlers({
     dao,
     questionsDao,
+    attemptsDao,
     isPrivilegedUser,
     ensureCourseAccess,
     syncQuizDerivedFields,
