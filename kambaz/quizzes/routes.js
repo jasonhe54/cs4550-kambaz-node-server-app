@@ -24,7 +24,6 @@ import { createGradingHelpers } from "./helpers/grading.js";
 import { createQuizHandlers } from "./handlers/quiz-handlers.js";
 import { createQuestionHandlers } from "./handlers/question-handlers.js";
 import { createAttemptHandlers } from "./handlers/attempt-handlers.js";
-import { seedVisualizationAttempts, visualizationSeed } from "./seed.js";
 
 export default function QuizzesRoutes(app) {
   const dao = QuizzesDao();
@@ -93,14 +92,6 @@ export default function QuizzesRoutes(app) {
       toAnswerEntries,
       evaluateQuestionAnswer,
     });
-
-  dao.seedQuizzes(visualizationSeed).catch((error) => {
-    console.error("Unable to seed visualization quizzes", error);
-  });
-
-  seedVisualizationAttempts({ enrollmentsDao, attemptsDao }).catch((error) => {
-    console.error("Unable to seed visualization quiz attempts", error);
-  });
 
   app.post("/api/courses/:courseId/quizzes", createQuizForCourse);
   app.get("/api/courses/:courseId/quizzes", findQuizzesForCourse);
